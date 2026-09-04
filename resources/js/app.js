@@ -1,6 +1,8 @@
 import { initCalculator } from './calculator';
+import { initAnalytics } from './analytics';
 
 initCalculator();
+initAnalytics();
 
 const menuToggle = document.querySelector('[data-menu-toggle]');
 if (menuToggle) {

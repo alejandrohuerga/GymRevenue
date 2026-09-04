@@ -1,15 +1,27 @@
+import { track } from './analytics';
+
+const RECOVERY_RATE_INACTIVE = 0.2;
+const RECOVERY_RATE_CANCELLATION = 0.15;
+
 export function estimateOpportunity({ averageFee, inactiveMembers, monthlyCancellations }) {
     if (
         !Number.isFinite(averageFee) ||
         !Number.isFinite(inactiveMembers) ||
         !Number.isFinite(monthlyCancellations)
     ) {
-        return 0;
+        return null;
     }
 
-    const monthlyValue = (inactiveMembers + monthlyCancellations) * averageFee;
+    const inactiveOpportunity = inactiveMembers * averageFee * RECOVERY_RATE_INACTIVE;
+    const cancellationOpportunity = monthlyCancellations * averageFee * RECOVERY_RATE_CANCELLATION;
+    const monthlyOpportunity = inactiveOpportunity + cancellationOpportunity;
 
-    return Math.round(monthlyValue * 0.5 * 100) / 100;
+    return {
+        monthly: Math.round(monthlyOpportunity * 100) / 100,
+        annual: Math.round(monthlyOpportunity * 12 * 100) / 100,
+        inactive: Math.round(inactiveOpportunity * 100) / 100,
+        cancellation: Math.round(cancellationOpportunity * 100) / 100,
+    };
 }
 
 export function formatMoney(value) {
@@ -18,12 +30,6 @@ export function formatMoney(value) {
         currency: 'EUR',
         maximumFractionDigits: 0,
     }).format(value);
-}
-
-function track(event, data = {}) {
-    if (typeof window !== 'undefined' && Array.isArray(window.dataLayer)) {
-        window.dataLayer.push({ event, ...data });
-    }
 }
 
 export function initCalculator() {
@@ -35,6 +41,10 @@ export function initCalculator() {
     const submit = form.querySelector('[data-calculator-submit]');
     const result = document.querySelector('[data-calculator-result]');
     const amount = result?.querySelector('[data-calculator-amount]');
+    const annual = result?.querySelector('[data-calculator-annual]');
+    const breakdownInactive = result?.querySelector('[data-calculator-inactive]');
+    const breakdownCancellation = result?.querySelector('[data-calculator-cancellation]');
+
     const fieldKeys = ['members', 'average_fee', 'inactive_members', 'monthly_cancellations'];
 
     const field = (key) => form.querySelector(`[name="${key}"]`);
@@ -62,6 +72,18 @@ export function initCalculator() {
         }
     };
 
+    const readInteger = (key) => {
+        const value = field(key)?.value.trim();
+        if (value === '') {
+            return null;
+        }
+        const number = Number(value);
+        if (!Number.isFinite(number) || !Number.isInteger(number)) {
+            return null;
+        }
+        return number;
+    };
+
     const readNumber = (key) => {
         const value = field(key)?.value.trim();
         if (value === '') {
@@ -83,7 +105,7 @@ export function initCalculator() {
         field(key)?.addEventListener('input', () => clearError(key));
     });
 
-    if (!submit || !result || !amount) {
+    if (!submit || !result || !amount || !annual || !breakdownInactive || !breakdownCancellation) {
         return;
     }
 
@@ -92,27 +114,31 @@ export function initCalculator() {
 
         fieldKeys.forEach(clearError);
 
-        const members = readNumber('members');
+        const members = readInteger('members');
         const averageFee = readNumber('average_fee');
-        const inactiveMembers = readNumber('inactive_members');
-        const monthlyCancellations = readNumber('monthly_cancellations');
+        const inactiveMembers = readInteger('inactive_members');
+        const monthlyCancellations = readInteger('monthly_cancellations');
 
         let valid = true;
 
-        if (members === null || members < 0) {
-            showError('members', 'Introduce un número válido.');
+        if (members === null || members < 1) {
+            showError('members', 'Introduce un número entero mayor que cero.');
             valid = false;
         }
-        if (averageFee === null || averageFee < 0) {
-            showError('average_fee', 'Introduce una cuota válida.');
+        if (averageFee === null || averageFee <= 0) {
+            showError('average_fee', 'Introduce una cuota mayor que cero.');
             valid = false;
         }
         if (inactiveMembers === null || inactiveMembers < 0) {
-            showError('inactive_members', 'Introduce un número válido.');
+            showError('inactive_members', 'Introduce un número entero mayor o igual que cero.');
             valid = false;
         }
         if (monthlyCancellations === null || monthlyCancellations < 0) {
-            showError('monthly_cancellations', 'Introduce un número válido.');
+            showError('monthly_cancellations', 'Introduce un número entero mayor o igual que cero.');
+            valid = false;
+        }
+        if (members !== null && inactiveMembers !== null && inactiveMembers > members) {
+            showError('inactive_members', 'Los socios inactivos no pueden superar el total de socios.');
             valid = false;
         }
 
@@ -126,20 +152,29 @@ export function initCalculator() {
             monthlyCancellations,
         });
 
-        amount.textContent = `${formatMoney(opportunity)} `;
+        if (opportunity === null) {
+            return;
+        }
+
+        amount.textContent = `${formatMoney(opportunity.monthly)} `;
+        annual.textContent = `≈ ${formatMoney(opportunity.annual)}/año`;
+        breakdownInactive.textContent = formatMoney(opportunity.inactive);
+        breakdownCancellation.textContent = formatMoney(opportunity.cancellation);
+
         setLeadField('members', members);
         setLeadField('average_fee', averageFee);
         setLeadField('inactive_members', inactiveMembers);
         setLeadField('monthly_cancellations', monthlyCancellations);
-        setLeadField('estimated_opportunity', opportunity);
+        setLeadField('estimated_opportunity', opportunity.monthly);
 
         result.hidden = false;
         result.classList.remove('calc-reveal');
         void result.offsetWidth;
         result.classList.add('calc-reveal');
+        result.focus({ preventScroll: true });
         result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-        track('calculator_completed', { amount: opportunity });
+        track('calculator_completed', { amount: opportunity.monthly });
     });
 
     result.addEventListener('animationend', () => {

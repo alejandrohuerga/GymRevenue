@@ -4,17 +4,43 @@ namespace App\Services;
 
 class OpportunityEstimator
 {
+    public const RECOVERY_RATE_INACTIVE = 0.20;
+
+    public const RECOVERY_RATE_CANCELLATION = 0.15;
+
     /**
-     * Estimación conservadora de la oportunidad de recuperación mensual.
+     * Estimación mensual conservadora de la oportunidad de recuperación.
      *
-     * Hipótesis de marketing: del valor mensual que representan los socios
-     * inactivos y las bajas, estimamos que al menos la mitad es recuperable
-     * con seguimiento. La fórmula se ajustará con datos reales.
+     * Hipótesis iniciales de marketing (se ajustarán con datos reales):
+     * - el 20% del valor mensual de los socios inactivos;
+     * - el 15% del valor mensual de las bajas.
      */
     public static function estimate(int $inactiveMembers, int $monthlyCancellations, float $averageFee): float
     {
-        $monthlyValue = ($inactiveMembers + $monthlyCancellations) * $averageFee;
+        $inactiveOpportunity = $inactiveMembers * $averageFee * self::RECOVERY_RATE_INACTIVE;
+        $cancellationOpportunity = $monthlyCancellations * $averageFee * self::RECOVERY_RATE_CANCELLATION;
 
-        return round($monthlyValue * 0.5, 2);
+        return round($inactiveOpportunity + $cancellationOpportunity, 2);
+    }
+
+    /**
+     * Proyección anual como referencia orientativa.
+     */
+    public static function estimateAnnual(int $inactiveMembers, int $monthlyCancellations, float $averageFee): float
+    {
+        return round(self::estimate($inactiveMembers, $monthlyCancellations, $averageFee) * 12, 2);
+    }
+
+    /**
+     * Desglose del cálculo mensual.
+     *
+     * @return array<string, float>
+     */
+    public static function breakdown(int $inactiveMembers, int $monthlyCancellations, float $averageFee): array
+    {
+        return [
+            'inactive' => round($inactiveMembers * $averageFee * self::RECOVERY_RATE_INACTIVE, 2),
+            'cancellation' => round($monthlyCancellations * $averageFee * self::RECOVERY_RATE_CANCELLATION, 2),
+        ];
     }
 }

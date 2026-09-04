@@ -13,6 +13,7 @@
         <div class="hidden md:block">
             <a
                 href="{{ route('calculator') }}"
+                data-track-cta="navbar"
                 class="rounded-sm bg-emerald-400 px-5 py-2.5 text-sm font-bold text-zinc-950 hover:bg-emerald-300 transition-colors"
             >
                 Analizar mi gimnasio
@@ -41,6 +42,7 @@
         </div>
         <a
             href="{{ route('calculator') }}"
+            data-track-cta="navbar-mobile"
             class="mt-6 inline-block rounded-sm bg-emerald-400 px-5 py-3 text-sm font-bold text-zinc-950 hover:bg-emerald-300 transition-colors"
         >
             Analizar mi gimnasio

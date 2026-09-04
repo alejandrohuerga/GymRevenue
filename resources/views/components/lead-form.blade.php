@@ -93,6 +93,12 @@
                 <input type="hidden" name="monthly_cancellations" value="{{ old('monthly_cancellations') }}">
                 <input type="hidden" name="estimated_opportunity" value="{{ old('estimated_opportunity') }}">
 
+                @if ($errors->has('members') || $errors->has('average_fee') || $errors->has('inactive_members') || $errors->has('monthly_cancellations'))
+                    <p class="text-sm text-red-400">
+                        Usa la calculadora y obtén tu resultado antes de enviar el formulario.
+                    </p>
+                @endif
+
                 <div class="grid gap-2">
                     <label for="consent" class="flex items-start gap-3 text-sm text-zinc-400 leading-relaxed cursor-pointer">
                         <input

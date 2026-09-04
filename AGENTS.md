@@ -1,18 +1,3 @@
-# Reglas de Estilo para OpenCode
-
-## Stack Técnico
-- Laravel 11 / Blade
-- Tailwind CSS
-- MySQL
-- Alpine.js / Vanilla JS
-
-## Guía de Diseño (Anti-IA Generic)
-- Estilo visual: Editorial / Minimalismo asimétrico.
-- Usar clases de Tailwind con bordes rectos o mínimos (`rounded-none` o `rounded-sm`).
-- No usar colores pastel ni gradientes de fondo.
-- Paleta: Base `zinc-950`, bordes `zinc-800`, texto `zinc-100`/`zinc-400`, acento `emerald-400`.
-- Todo formulario debe incluir la directiva `@csrf` de Laravel.
-
 # GymRevenue — AGENTS.md
 
 ## 1. Contexto del proyecto
@@ -1465,3 +1450,528 @@ FUNCIONALIDADES
     >
 COMPLEJIDAD
 ```
+
+---
+
+# 45. ESTADO ACTUAL DEL PROYECTO — DESPUÉS DE LA LANDING
+
+La landing principal ya está construida.
+
+Por tanto, NO volver a trabajar en la estructura visual general de la landing salvo que una prueba o problema concreto de UX/conversión lo justifique.
+
+La siguiente prioridad de desarrollo es convertir la calculadora en una funcionalidad real y dejar preparado el flujo de captación.
+
+## Objetivo inmediato
+
+Construir y probar este flujo completo:
+
+```text
+LANDING
+   ↓
+CALCULADORA
+   ↓
+RESULTADO INMEDIATO
+   ↓
+CTA "ANALIZAR MI GIMNASIO GRATIS"
+   ↓
+FORMULARIO DE CONTACTO
+   ↓
+LEAD GUARDADO
+   ↓
+PÁGINA DE GRACIAS
+```
+
+IMPORTANTE:
+
+- No pedir registro antes de utilizar la calculadora.
+- No pedir email antes de mostrar el resultado.
+- El usuario debe poder introducir los datos y ver el resultado inmediatamente.
+- El email y los datos de contacto se solicitan DESPUÉS del resultado, cuando el usuario ya ha recibido valor.
+- No crear todavía sistema de usuarios, login, dashboard privado ni suscripciones.
+
+La razón es maximizar la conversión y validar primero si el problema despierta interés comercial.
+
+---
+
+# 46. CALCULADORA V1 — ESPECIFICACIÓN FUNCIONAL
+
+La calculadora es ahora la funcionalidad prioritaria del proyecto.
+
+Debe existir tanto en la Home como en `/calculadora` reutilizando el mismo componente y la misma lógica.
+
+## Campos V1
+
+Utilizar únicamente estos cuatro campos:
+
+```text
+members
+average_fee
+inactive_members
+monthly_cancellations
+```
+
+Correspondencia visual:
+
+```text
+Número de socios
+Cuota mensual media (€)
+Socios actualmente inactivos
+Bajas mensuales aproximadas
+```
+
+### Reglas de validación
+
+- Todos los campos son obligatorios.
+- Todos los campos son numéricos.
+- No aceptar números negativos.
+- `members` debe ser un entero positivo.
+- `inactive_members` debe ser un entero positivo o cero.
+- `monthly_cancellations` debe ser un entero positivo o cero.
+- `average_fee` debe ser mayor que cero.
+- `inactive_members` no puede superar `members`.
+- Los errores deben mostrarse junto al campo correspondiente.
+- La validación debe existir en frontend y backend.
+- Nunca confiar en el cálculo realizado únicamente por JavaScript.
+
+## Valores iniciales sugeridos
+
+```text
+Número de socios: 350
+Cuota mensual media: 40 €
+Socios inactivos: 30
+Bajas mensuales: 15
+```
+
+Estos valores son únicamente valores de ejemplo para facilitar la interacción y no deben presentarse como datos reales de gimnasios.
+
+---
+
+# 47. FÓRMULA DE LA CALCULADORA V1
+
+La calculadora debe mostrar una **oportunidad estimada de recuperación**, no afirmar que el gimnasio está perdiendo exactamente esa cantidad.
+
+La fórmula inicial será deliberadamente sencilla y conservadora.
+
+## Tasas configurables
+
+Definir las tasas como constantes/configuración fácilmente modificable:
+
+```javascript
+const RECOVERY_RATE_INACTIVE = 0.20;
+const RECOVERY_RATE_CANCELLATION = 0.15;
+```
+
+Estas tasas son hipótesis iniciales de marketing y NO datos científicos ni resultados garantizados.
+
+## Cálculo
+
+```text
+inactive_opportunity = inactive_members × average_fee × 0.20
+
+cancellation_opportunity = monthly_cancellations × average_fee × 0.15
+
+estimated_monthly_opportunity =
+    inactive_opportunity + cancellation_opportunity
+
+estimated_annual_opportunity =
+    estimated_monthly_opportunity × 12
+```
+
+### Ejemplo
+
+Con:
+
+```text
+30 socios inactivos
+40 € cuota media
+15 bajas mensuales
+```
+
+El cálculo sería:
+
+```text
+30 × 40 × 0.20 = 240 €
+
+15 × 40 × 0.15 = 90 €
+
+240 + 90 = 330 €/mes
+
+330 × 12 = 3.960 €/año
+```
+
+El resultado debe mostrar:
+
+```text
+OPORTUNIDAD ESTIMADA
+
+330 €/mes
+
+Hasta 3.960 €/año como referencia estimada
+```
+
+No utilizar lenguaje como:
+
+```text
+"Estás perdiendo 330 € al mes."
+"GymRevenue te hará recuperar 3.960 €."
+```
+
+Utilizar lenguaje como:
+
+```text
+"Tu oportunidad estimada de recuperación podría ser de 330 €/mes."
+```
+
+Incluir siempre una nota:
+
+> Esta cifra es una estimación orientativa basada en los datos introducidos. No representa dinero perdido de forma exacta ni garantiza ingresos recuperables.
+
+## Importante para futuras versiones
+
+No añadir más variables ni crear una fórmula más compleja hasta disponer de datos reales de gimnasios.
+
+Las tasas deben poder cambiarse sin rehacer la interfaz.
+
+Cuando tengamos datos reales, analizar:
+
+- porcentaje real de recuperación de inactivos;
+- porcentaje real de recuperación de bajas;
+- diferencias por tipo de gimnasio;
+- cuota media;
+- antigüedad del socio;
+- frecuencia de asistencia;
+- comportamiento previo a la baja.
+
+La fórmula V1 existe para validar conversión, no para construir todavía un modelo predictivo perfecto.
+
+---
+
+# 48. UX DEL RESULTADO
+
+El resultado debe aparecer sin recargar la página.
+
+Debe contener como mínimo:
+
+```text
+OPORTUNIDAD ESTIMADA
+330 €/mes
+
+≈ 3.960 €/año
+
+Desglose
+────────────────────────
+Socios inactivos       240 €/mes
+Bajas mensuales         90 €/mes
+────────────────────────
+
+¿Quieres descubrir exactamente dónde está la oportunidad?
+
+[ ANALIZAR MI GIMNASIO GRATIS ]
+```
+
+El desglose es importante porque aumenta la transparencia y permite entender de dónde sale la cifra.
+
+El CTA posterior al resultado debe abrir o mostrar el formulario de captación.
+
+No obligar al usuario a registrarse para consultar el resultado.
+
+---
+
+# 49. FORMULARIO DESPUÉS DEL RESULTADO
+
+Una vez mostrado el resultado, solicitar únicamente los datos necesarios para contactar con el interesado.
+
+Campos:
+
+```text
+Nombre
+Email
+Nombre del gimnasio
+Software que utilizas (opcional)
+Consentimiento
+```
+
+Los datos de la calculadora deben conservarse y asociarse al lead.
+
+El lead debe guardar también:
+
+```text
+members
+average_fee
+inactive_members
+monthly_cancellations
+estimated_opportunity
+```
+
+De esta forma podremos saber posteriormente qué tipo de gimnasio está mostrando interés y qué oportunidades estima la calculadora.
+
+No solicitar teléfono en esta fase.
+
+No solicitar dirección física.
+
+No solicitar datos de socios individuales.
+
+---
+
+# 50. IMPLEMENTACIÓN TÉCNICA DE LA CALCULADORA
+
+La lógica debe estar separada de la presentación.
+
+## Frontend
+
+Utilizar:
+
+- Blade.
+- Tailwind existente.
+- JavaScript vanilla.
+
+No introducir React, Vue, Livewire u otro framework para esta funcionalidad.
+
+La calculadora debe:
+
+1. Capturar inputs.
+2. Validarlos en frontend.
+3. Calcular el resultado instantáneamente.
+4. Formatear cantidades en euros correctamente.
+5. Mostrar el desglose.
+6. Mostrar/ocultar el resultado de forma accesible.
+7. Llevar el foco al resultado cuando corresponda.
+8. Mantener la experiencia correcta en móvil.
+
+## Backend
+
+Aunque el resultado se muestre instantáneamente con JavaScript, Laravel debe poder recibir y validar los datos.
+
+El backend será la fuente de confianza para cualquier dato que se guarde.
+
+Debe utilizar:
+
+- Form Request o validación equivalente.
+- CSRF.
+- Tipos y límites razonables.
+- Rate limiting cuando el endpoint sea público y pueda abusarse.
+- Protección anti-spam en el formulario de lead.
+
+---
+
+# 51. ORDEN EXACTO DE TRABAJO PARA OPENCODE — SIGUIENTE TAREA
+
+Cuando el usuario pida a OpenCode continuar el proyecto, debe seguir este orden y no adelantarse a fases futuras.
+
+## STEP 38 — Inspeccionar el estado actual
+
+Antes de modificar nada:
+
+1. Inspeccionar `routes/web.php`.
+2. Inspeccionar `resources/views`.
+3. Localizar la calculadora existente en Home.
+4. Localizar componentes Blade relacionados con calculadora.
+5. Revisar `resources/js` y la configuración Vite existente.
+6. Revisar si ya existe algún script JavaScript para la calculadora.
+7. Revisar estado de migraciones y base de datos.
+8. No recrear archivos que ya existan.
+
+## STEP 39 — Implementar calculadora V1
+
+Implementar únicamente:
+
+- inputs;
+- validación frontend;
+- fórmula V1;
+- resultado instantáneo;
+- desglose;
+- formato monetario;
+- CTA posterior al resultado;
+- responsive;
+- accesibilidad básica.
+
+No implementar todavía:
+
+- login;
+- registro;
+- dashboard privado;
+- CSV;
+- IA;
+- integraciones;
+- pagos;
+- automatizaciones;
+- WhatsApp;
+- email marketing automático.
+
+## STEP 40 — Implementar backend del flujo de cálculo
+
+Crear o adaptar el endpoint necesario para que Laravel pueda validar los datos.
+
+La lógica de presentación puede ejecutarse en JavaScript para UX inmediata, pero nunca guardar datos sin validación backend.
+
+## STEP 41 — Implementar captación del lead
+
+Después del resultado:
+
+```text
+Resultado
+   ↓
+CTA
+   ↓
+Formulario
+   ↓
+POST /lead
+   ↓
+Validación
+   ↓
+gym_leads
+   ↓
+/gracias
+```
+
+El formulario debe conservar los datos de la calculadora mediante campos ocultos o sesión de forma segura, evitando confiar en valores manipulables del cliente sin volver a validarlos.
+
+## STEP 42 — Base de datos
+
+Utilizar la tabla `gym_leads` definida anteriormente.
+
+No crear todavía tablas de usuarios del SaaS ni de socios del gimnasio.
+
+## STEP 43 — Testing
+
+Probar como mínimo:
+
+### Caso válido
+
+```text
+350 socios
+40 €
+30 inactivos
+15 bajas
+```
+
+Resultado esperado:
+
+```text
+330 €/mes
+3.960 €/año
+```
+
+### Casos inválidos
+
+- valores negativos;
+- cuota 0;
+- campos vacíos;
+- texto donde se espera número;
+- inactivos > socios;
+- valores excesivamente grandes;
+- envío repetido del formulario;
+- manipulación de valores desde frontend.
+
+### Responsive
+
+Comprobar:
+
+- móvil;
+- tablet;
+- desktop.
+
+### Calidad
+
+Comprobar:
+
+```text
+npm run build
+```
+
+y las pruebas/validaciones Laravel disponibles en el proyecto.
+
+No dejar errores de consola.
+
+---
+
+# 52. DESPUÉS DE TERMINAR LA CALCULADORA
+
+Una vez implementado el flujo y comprobado que funciona correctamente, NO saltar directamente a construir el SaaS completo.
+
+El siguiente objetivo será:
+
+```text
+CALCULADORA FUNCIONAL
+       ↓
+CAPTACIÓN DE LEADS
+       ↓
+PUBLICAR
+       ↓
+CONSEGUIR PRIMEROS GIMNASIOS INTERESADOS
+       ↓
+OBSERVAR RESPUESTAS
+       ↓
+VALIDAR PROBLEMA
+       ↓
+VALIDAR DISPOSICIÓN A PROBAR/PAGAR
+       ↓
+ENTONCES CONSTRUIR MVP REAL
+```
+
+No construir el dashboard completo hasta que exista evidencia de interés.
+
+La primera versión del producto real deberá empezar posteriormente con importación CSV y análisis de datos reales de gimnasios.
+
+---
+
+# 53. CRITERIO DE DECISIÓN ANTES DE CONSTRUIR EL SAAS
+
+No avanzar a desarrollo profundo únicamente porque la landing esté terminada.
+
+La evidencia que buscamos es:
+
+1. Personas del sector utilizan la calculadora.
+2. Algunas dejan sus datos.
+3. Algunas aceptan que analicemos sus datos reales.
+4. Existe interés en recibir recomendaciones concretas.
+5. Existe disposición a probar una solución.
+6. Idealmente existe disposición a pagar.
+
+Si la calculadora recibe visitas pero nadie deja datos, revisar propuesta y CTA.
+
+Si dejan datos pero nadie quiere un análisis real, revisar el problema que estamos resolviendo.
+
+Si quieren análisis real, entonces construir el MVP de análisis.
+
+Si además existe disposición a pagar, priorizar monetización.
+
+---
+
+# 54. PROMPT OPERATIVO PARA OPENCODE
+
+Cuando se quiera continuar desde el estado actual, el usuario puede indicar a OpenCode:
+
+```text
+Lee AGENTS.md y continúa exactamente desde el estado actual del proyecto.
+
+La landing ya está construida. No rehagas la landing ni añadas funcionalidades futuras.
+
+La siguiente tarea es STEP 38 en adelante: implementar la Calculadora V1 de GymRevenue y dejar funcionando el flujo completo hasta la captación del lead.
+
+Primero inspecciona el proyecto existente y reutiliza los componentes actuales.
+
+Implementa únicamente:
+
+1. Calculadora sin registro previo.
+2. Campos: número de socios, cuota mensual media, socios inactivos y bajas mensuales.
+3. Validación frontend y backend.
+4. Cálculo instantáneo con JavaScript vanilla.
+5. Fórmula definida en AGENTS.md.
+6. Resultado con oportunidad mensual y anual.
+7. Desglose de la estimación.
+8. CTA para analizar el gimnasio.
+9. Formulario con nombre, email, gimnasio, software opcional y consentimiento.
+10. Guardado del lead y de los datos de la calculadora en MySQL.
+11. Redirección a /gracias.
+12. Responsive, accesibilidad, seguridad y testing.
+
+No implementes login, registro, dashboard, CSV, IA, integraciones, pagos, automatizaciones ni WhatsApp.
+
+Antes de modificar archivos, inspecciona qué existe actualmente. No sobrescribas ni recrees componentes innecesariamente.
+
+Al terminar, ejecuta las comprobaciones disponibles, incluyendo npm run build y tests/validaciones Laravel, y dime exactamente qué archivos has modificado, qué has implementado y qué queda pendiente.
+```
+
+Este prompt debe considerarse una guía operativa y siempre debe prevalecer el contenido completo de este AGENTS.md sobre cualquier interpretación distinta del prompt.
+

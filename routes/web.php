@@ -9,7 +9,7 @@ Route::get('/', [PageController::class, 'home'])->name('home');
 
 Route::get('/calculadora', [PageController::class, 'calculator'])->name('calculator');
 
-Route::post('/calculadora', [CalculatorController::class, 'calculate'])->name('calculator.calculate');
+Route::post('/calculadora', [CalculatorController::class, 'calculate'])->name('calculator.calculate')->middleware('throttle:10,1');
 
 Route::post('/lead', [LeadController::class, 'store'])->name('lead.store')->middleware('throttle:5,1');
 
