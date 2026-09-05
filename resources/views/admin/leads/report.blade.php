@@ -1,0 +1,216 @@
+@extends('layouts.admin')
+
+@section('title', 'Informe — '.$lead->gym_name.' — GymRevenue')
+
+@section('content')
+    <div class="max-w-3xl mx-auto px-6 py-10">
+        <a href="{{ route('admin.leads.show', $lead) }}" class="text-sm text-zinc-400 hover:text-zinc-100 transition-colors">← Volver al lead</a>
+
+        @php
+            $fmt = fn (float $value): string => str_ends_with(number_format($value, 2, ',', '.'), ',00')
+                ? substr(number_format($value, 2, ',', '.'), 0, -3)
+                : number_format($value, 2, ',', '.');
+            $reg = fn (int $n): string => $n === 1 ? 'registro' : 'registros';
+        @endphp
+
+        <header class="mt-8 border-b border-zinc-800 pb-8">
+            <p class="text-sm uppercase tracking-widest text-emerald-400">Informe comercial</p>
+            <h1 class="mt-2 text-3xl md:text-4xl font-black tracking-tight">Análisis de tu gimnasio</h1>
+            <p class="mt-2 text-sm text-zinc-500">
+                Analizado a fecha {{ $report->referenceDate }}
+                @if ($report->usable)
+                    · {{ $report->validRecords }} {{ $reg($report->validRecords) }} válidos
+                @endif
+            </p>
+        </header>
+
+        @if (! $report->usable)
+            <section class="mt-8 border border-amber-500/20 bg-amber-500/5 p-8 md:p-10">
+                <p class="text-sm uppercase tracking-widest text-amber-400">Informe no disponible</p>
+                <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight">No hemos podido generar el informe</h2>
+                <p class="mt-4 text-sm text-zinc-400 leading-relaxed">
+                    El análisis no contiene registros utilizables. Mostrar cifras basadas en esos datos
+                    induciría a error, por eso mostramos este aviso en lugar de un informe.
+                </p>
+
+                @if ($report->recordsWithErrors > 0)
+                    <p class="mt-4 text-sm text-zinc-400">
+                        Se analizaron {{ $report->totalRecords }} {{ $reg($report->totalRecords) }} y
+                        {{ $report->recordsWithErrors === 1 ? '1 presentaba errores' : $report->recordsWithErrors.' presentaban errores' }}.
+                    </p>
+
+                    @if ($report->qualityErrors !== [])
+                        <div class="mt-5">
+                            <p class="text-xs uppercase tracking-widest text-zinc-500">Calidad de los datos</p>
+                            <ul class="mt-3 grid gap-1 text-sm text-zinc-400">
+                                @foreach ($report->qualityErrors as $error)
+                                    <li class="flex gap-2">
+                                        <span class="text-amber-400">{{ $error['count'] }}×</span>
+                                        <span>{{ $error['label'] }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                @endif
+
+                <div class="mt-8">
+                    <a
+                        href="{{ route('admin.leads.show', $lead) }}"
+                        class="inline-block rounded-sm border border-zinc-700 px-6 py-3 text-sm font-semibold text-zinc-200 hover:border-emerald-400 hover:text-emerald-400 transition-colors"
+                    >
+                        Volver al lead
+                    </a>
+                </div>
+            </section>
+        @else
+            @php
+                $heroAmount = $report->reactivationPotential > 0 ? $report->reactivationPotential : $report->monthlyValueAtRisk;
+                $heroLabel = $report->reactivationPotential > 0
+                    ? 'Potencial de reactivación'
+                    : 'Cuotas de socios con baja actividad';
+                $heroSuffix = $report->reactivationPotential > 0 ? ' €' : ' €/mes';
+                $heroCaption = $report->reactivationPotential > 0
+                    ? 'Estimación de facturación potencial durante 3 meses si se consiguiera reactivar el grupo detectado.'
+                    : 'Cuotas mensuales asociadas a socios activos que llevan más de 60 días sin registrar una visita.';
+            @endphp
+
+            @if ($report->reactivationPotential > 0 || $report->monthlyValueAtRisk > 0)
+                <section class="mt-8 border border-emerald-500/20 bg-emerald-500/5 p-8 md:p-12 text-center" aria-labelledby="oportunidad-economica">
+                    <h2 id="oportunidad-economica" class="text-sm uppercase tracking-widest text-emerald-400">{{ $heroLabel }}</h2>
+                    <p class="mt-4 text-5xl md:text-6xl font-black tracking-tight text-zinc-50 tabular-nums">
+                        {{ $fmt($heroAmount) }}<span class="text-2xl md:text-4xl text-emerald-400">{{ $heroSuffix }}</span>
+                    </p>
+                    <p class="mx-auto mt-4 max-w-md text-sm text-zinc-400 leading-relaxed">{{ $heroCaption }}</p>
+                    <p class="mt-5 text-xs text-zinc-600">
+                        Cifra estimada y orientativa. No representa dinero perdido de forma exacta ni garantiza ingresos recuperables.
+                    </p>
+                </section>
+            @endif
+
+            <section class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4" aria-label="Resumen">
+                @if ($report->activeMembers > 0)
+                    <div class="border border-zinc-800 p-5">
+                        <p class="text-xs uppercase tracking-widest text-zinc-500">Socios activos</p>
+                        <p class="mt-2 text-3xl font-black tabular-nums">{{ $report->activeMembers }}</p>
+                    </div>
+                @endif
+
+                @if ($report->inactiveMembers > 0)
+                    <div class="border border-zinc-800 p-5">
+                        <p class="text-xs uppercase tracking-widest text-zinc-500">Socios inactivos</p>
+                        <p class="mt-2 text-3xl font-black tabular-nums">{{ $report->inactiveMembers }}</p>
+                    </div>
+                @endif
+
+                @if ($report->recentCancellations > 0)
+                    <div class="border border-zinc-800 p-5">
+                        <p class="text-xs uppercase tracking-widest text-zinc-500">Bajas recientes</p>
+                        <p class="mt-2 text-3xl font-black tabular-nums">{{ $report->recentCancellations }}</p>
+                        <p class="mt-1 text-xs text-zinc-600">últimos 90 días</p>
+                    </div>
+                @endif
+
+                @if ($report->activeLowActivity > 0)
+                    <div class="border border-zinc-800 p-5">
+                        <p class="text-xs uppercase tracking-widest text-zinc-500">Baja actividad</p>
+                        <p class="mt-2 text-3xl font-black tabular-nums">{{ $report->activeLowActivity }}</p>
+                        <p class="mt-1 text-xs text-zinc-600">+60 días sin visitar</p>
+                    </div>
+                @endif
+            </section>
+
+            <section class="mt-12" aria-labelledby="oportunidades">
+                <h2 id="oportunidades" class="text-2xl md:text-3xl font-black tracking-tight">¿Qué hemos encontrado?</h2>
+
+                @forelse ($report->opportunities as $opportunity)
+                    <div class="mt-4 border border-zinc-800 p-6 md:p-8">
+                        <h3 class="font-bold text-zinc-100">{{ $opportunity['title'] }}</h3>
+                        <p class="mt-3 text-sm text-zinc-400 leading-relaxed">{{ $opportunity['text'] }}</p>
+                    </div>
+                @empty
+                    <p class="mt-4 text-sm text-zinc-400">No hemos detectado oportunidades que requieran tu atención en este momento.</p>
+                @endforelse
+
+                @php
+                    $neutralNotes = [];
+                    if ($report->inactiveMembers === 0) {
+                        $neutralNotes[] = 'No hemos detectado socios inactivos en el archivo.';
+                    }
+                    if ($report->activeLowActivity === 0) {
+                        $neutralNotes[] = 'No hemos detectado socios activos con más de 60 días sin registrar una visita.';
+                    }
+                    if ($report->recentCancellations === 0) {
+                        $neutralNotes[] = 'No hemos detectado bajas durante los últimos 90 días.';
+                    }
+                @endphp
+
+                @if ($neutralNotes !== [])
+                    <div class="mt-6 grid gap-2">
+                        @foreach ($neutralNotes as $note)
+                            <p class="flex items-start gap-3 text-sm text-zinc-500">
+                                <span class="mt-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                                <span>{{ $note }}</span>
+                            </p>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
+
+            <section class="mt-12" aria-labelledby="calidad">
+                <h2 id="calidad" class="text-xs uppercase tracking-widest text-zinc-500">Calidad de los datos</h2>
+
+                @if ($report->recordsWithErrors > 0)
+                    <p class="mt-3 text-sm text-zinc-400 leading-relaxed">
+                        Hemos analizado {{ $report->totalRecords }} {{ $reg($report->totalRecords) }}:
+                        {{ $report->validRecords }} válidos y
+                        {{ $report->recordsWithErrors === 1 ? '1 con errores' : $report->recordsWithErrors.' con errores' }}.
+                        Los registros con errores no se han utilizado para el cálculo de las cifras.
+                    </p>
+
+                    @if ($report->qualityErrors !== [])
+                        <ul class="mt-4 grid gap-1.5 text-sm text-zinc-500">
+                            @foreach ($report->qualityErrors as $error)
+                                <li class="flex gap-2">
+                                    <span class="text-zinc-600">{{ $error['count'] }}×</span>
+                                    <span>{{ $error['label'] }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+
+                    <p class="mt-4 text-xs text-zinc-600">Revisa las fechas, estados y cuotas de estos registros para que puedan incluirse en el próximo análisis.</p>
+                @else
+                    <p class="mt-3 text-sm text-zinc-500">
+                        Se analizaron {{ $report->totalRecords }} {{ $reg($report->totalRecords) }} y todos eran válidos.
+                    </p>
+                @endif
+            </section>
+
+            <section class="mt-12 border border-emerald-500/20 bg-emerald-500/5 p-8 md:p-10 text-center" aria-labelledby="cta">
+                <h2 id="cta" class="text-2xl md:text-3xl font-black tracking-tight">¿Quieres saber cómo aprovechar estas oportunidades?</h2>
+                <p class="mx-auto mt-3 max-w-md text-sm text-zinc-400 leading-relaxed">
+                    Podemos ayudarte a convertir estos datos en acciones concretas para recuperar socios y mejorar la retención.
+                </p>
+
+                @php
+                    $subject = rawurlencode('Análisis GymRevenue — '.$lead->gym_name);
+                    $body = rawurlencode(
+                        "Hola {$lead->contact_name},\n\n".
+                        "Hemos analizado el CSV de {$lead->gym_name} con GymRevenue.\n".
+                        '¿Podemos revisar juntos las oportunidades detectadas para recuperar socios y mejorar la retención?'
+                    );
+                @endphp
+
+                <div class="mt-8">
+                    <a
+                        href="mailto:{{ $lead->email }}?subject={{ $subject }}&amp;body={{ $body }}"
+                        class="inline-block rounded-sm bg-emerald-400 px-8 py-4 text-sm font-bold text-zinc-950 hover:bg-emerald-300 transition-colors"
+                    >
+                        Quiero mejorar mi gimnasio
+                    </a>
+                </div>
+            </section>
+        @endif
+    </div>
+@endsection

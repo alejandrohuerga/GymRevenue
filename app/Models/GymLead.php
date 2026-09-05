@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'gym_name',
@@ -16,11 +17,34 @@ use Illuminate\Database\Eloquent\Model;
     'inactive_members',
     'monthly_cancellations',
     'estimated_opportunity',
+    'status',
+    'notes',
+    'csv_path',
+    'csv_original_name',
+    'csv_uploaded_at',
     'consent_at',
 ])]
 class GymLead extends Model
 {
     use HasFactory;
+
+    public const STATUSES = [
+        'new',
+        'contacted',
+        'interested',
+        'proposal',
+        'won',
+        'lost',
+    ];
+
+    public const STATUS_LABELS = [
+        'new' => 'Nuevo',
+        'contacted' => 'Contactado',
+        'interested' => 'Interesado',
+        'proposal' => 'Propuesta',
+        'won' => 'Ganado',
+        'lost' => 'Perdido',
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -35,7 +59,13 @@ class GymLead extends Model
             'inactive_members' => 'integer',
             'monthly_cancellations' => 'integer',
             'estimated_opportunity' => 'decimal:2',
+            'csv_uploaded_at' => 'datetime',
             'consent_at' => 'datetime',
         ];
+    }
+
+    public function analysis(): HasOne
+    {
+        return $this->hasOne(GymLeadAnalysis::class);
     }
 }

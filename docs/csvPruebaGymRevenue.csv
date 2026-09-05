@@ -1,0 +1,21 @@
+﻿member_id;name;email;status;join_date;last_visit;monthly_fee;cancel_date
+10001;Juan García;juan.garcia@example.com;active;15/01/2024;03/09/2026;40.00;
+10002;Ana López;ana.lopez@example.com;active;10/03/2025;28/08/2026;40.00;
+10003;Carlos Muñoz;carlos.munoz@example.com;inactive;20/06/2024;10/07/2026;35.00;
+10004;María Sánchez;maria.sanchez@example.com;inactive;05/11/2023;01/06/2026;45.00;
+10005;David Fernández;david.fernandez@example.com;active;01/02/2026;01/09/2026;40.00;
+10006;Laura Martín;laura.martin@example.com;cancelled;15/09/2022;20/07/2026;30.00;15/08/2026
+10007;Pablo Rodríguez;pablo.rodriguez@example.com;active;12/08/2025;15/08/2026;50.00;
+10008;Lucía Gómez;lucia.gomez@example.com;inactive;22/04/2024;25/05/2026;40.00;
+10009;Javier Díaz;javier.diaz@example.com;active;18/02/2023;02/09/2026;42.50;
+10010;Elena Jiménez;elena.jimenez@example.com;cancelled;30/10/2021;30/06/2026;35.00;31/07/2026
+10011;Sergio Navarro;sergio.navarro@example.com;inactive;20/01/2025;05/07/2026;39.90;
+10012;Carmen Ruiz;carmen.ruiz@example.com;active;10/05/2026;04/09/2026;45.00;
+10013;Álvaro Pérez;alvaro.perez@example.com;inactive;14/07/2023;20/06/2026;40.00;
+10014;Nuria Martín;nuria.martin@example.com;active;01/09/2024;30/08/2026;37.50;
+10015;Óscar Sánchez;oscar.sanchez@example.com;cancelled;12/02/2024;15/07/2026;40.00;05/08/2026
+10016;Mónica González;monica.gonzalez@example.com;active;18/05/2025;31/08/2026;42.00;
+10017;Iván Hernández;ivan.hernandez@example.com;inactive;01/12/2022;10/05/2026;38.00;
+10018;Paula Navarro;paula.navarro@example.com;active;08/01/2026;02/09/2026;45.00;
+10019;Raúl Jiménez;raul.jimenez@example.com;inactive;25/08/2024;05/06/2026;40.00;
+10020;Sofía Álvarez;sofia.alvarez@example.com;active;12/11/2025;27/08/2026;39.00;

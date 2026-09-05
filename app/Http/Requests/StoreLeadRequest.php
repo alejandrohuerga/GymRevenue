@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidMemberCsv;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreLeadRequest extends FormRequest
@@ -17,7 +18,7 @@ class StoreLeadRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, mixed>>
      */
     public function rules(): array
     {
@@ -30,6 +31,7 @@ class StoreLeadRequest extends FormRequest
             'average_fee' => ['required', 'numeric', 'gt:0', 'max:10000'],
             'inactive_members' => ['required', 'integer', 'min:0', 'max:100000', 'lte:members'],
             'monthly_cancellations' => ['required', 'integer', 'min:0', 'max:100000'],
+            'csv' => ['nullable', 'file', 'mimes:csv,txt', 'max:2048', new ValidMemberCsv],
             'consent' => ['accepted'],
             'website' => ['prohibited'],
         ];
@@ -58,6 +60,9 @@ class StoreLeadRequest extends FormRequest
             'monthly_cancellations.required' => 'Indica las bajas mensuales aproximadas.',
             'monthly_cancellations.integer' => 'Las bajas mensuales deben ser un entero.',
             'inactive_members.lte' => 'Los socios inactivos no pueden superar el total de socios.',
+            'csv.file' => 'El archivo subido no es válido.',
+            'csv.mimes' => 'El archivo debe ser un CSV.',
+            'csv.max' => 'El CSV no puede superar los 2 MB.',
             'consent.accepted' => 'Debes aceptar el tratamiento de tus datos.',
         ];
     }

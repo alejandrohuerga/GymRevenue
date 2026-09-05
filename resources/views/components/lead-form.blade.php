@@ -12,7 +12,7 @@
         </div>
 
         <div class="md:col-span-7">
-            <form data-lead-form action="{{ route('lead.store') }}" method="POST" class="grid gap-6">
+            <form data-lead-form action="{{ route('lead.store') }}" method="POST" enctype="multipart/form-data" class="grid gap-6">
                 @csrf
 
                 <div aria-hidden="true" class="hidden">
@@ -83,6 +83,25 @@
                         placeholder="Ej.: Excel, o tu software actual"
                     >
                     @error('software')
+                        <p class="text-sm text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="grid gap-2">
+                    <label for="members-csv" class="text-sm text-zinc-400">
+                        ¿Tienes un CSV con los datos de tus socios? <span class="text-zinc-600">(opcional)</span>
+                    </label>
+                    <input
+                        id="members-csv"
+                        name="csv"
+                        type="file"
+                        accept=".csv,text/csv,text/plain"
+                        class="block w-full text-sm text-zinc-300 file:mr-4 file:rounded-none file:border-0 file:bg-zinc-800 file:px-4 file:py-3 file:text-sm file:font-semibold file:text-zinc-100 file:hover:bg-zinc-700 cursor-pointer"
+                    >
+                    <p class="text-xs text-zinc-500 leading-relaxed">
+                        Si tienes un CSV con los datos de tus socios, puedes subirlo para realizar un análisis más completo.
+                    </p>
+                    @error('csv')
                         <p class="text-sm text-red-400">{{ $message }}</p>
                     @enderror
                 </div>
