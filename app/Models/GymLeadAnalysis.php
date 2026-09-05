@@ -6,9 +6,11 @@ use App\Services\Analysis\AnalysisResult;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 #[Fillable([
     'gym_lead_id',
+    'public_token',
     'reference_date',
     'members_total',
     'members_valid',
@@ -78,11 +80,64 @@ class GymLeadAnalysis extends Model
             'opportunities' => 'array',
             'quality' => 'array',
             'extra' => 'array',
+            'public_token' => 'string',
         ];
     }
 
     public function gymLead(): BelongsTo
     {
         return $this->belongsTo(GymLead::class);
+    }
+
+    /**
+     * Genera el token público automáticamente al crear el análisis.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $analysis): void {
+            if ($analysis->public_token === null) {
+                $analysis->public_token = self::generateAccessToken();
+            }
+        });
+    }
+
+    /**
+     * Genera un token criptográficamente seguro, largo e impredecible.
+     *
+     * Se comprueba la unicidad antes de devolverlo porque la columna tiene
+     * una restricción UNIQUE y no queremos depender de que una colisión sea
+     * "prácticamente imposible": si ocurriera, se regenera.
+     */
+    public static function generateAccessToken(): string
+    {
+        do {
+            $token = Str::random(64);
+        } while (static::query()->where('public_token', $token)->exists());
+
+        return $token;
+    }
+
+    /**
+     * URL pública del informe comercial.
+     */
+    public function publicUrl(): string
+    {
+        return route('analysis.public.show', $this->public_token);
+    }
+
+    /**
+     * Garantiza que el análisis dispone de token público.
+     *
+     * Permite que los análisis creados antes de introducir el token mantengan
+     * su funcionamiento desde Admin y obtengan su enlace público bajo demanda.
+     */
+    public function ensurePublicToken(): string
+    {
+        if ($this->public_token === null) {
+            $this->update(['public_token' => self::generateAccessToken()]);
+            $this->refresh();
+        }
+
+        return (string) $this->public_token;
     }
 }

@@ -21,6 +21,8 @@
             <meta property="og:description" content="@yield('meta_description')">
         @endif
 
+        @stack('head')
+
         @fonts
 
         @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))

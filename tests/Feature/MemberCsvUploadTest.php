@@ -101,11 +101,10 @@ CSV;
     {
         $response = $this->postWithCsvContent('socios.csv', self::VALID_CSV);
 
-        $response->assertRedirect(route('thanks'));
+        $lead = GymLead::where('email', 'ana@fitclub.test')->firstOrFail();
 
-        $lead = GymLead::where('email', 'ana@fitclub.test')->first();
+        $response->assertRedirect($lead->analysis->publicUrl());
 
-        $this->assertNotNull($lead);
         $this->assertNotNull($lead->csv_path);
         $this->assertSame('socios.csv', $lead->csv_original_name);
         $this->assertNotNull($lead->csv_uploaded_at);
@@ -183,9 +182,10 @@ CSV;
 
         $response = $this->postWithCsvContent('minimo.csv', $content);
 
-        $response->assertRedirect(route('thanks'));
+        $lead = GymLead::where('email', 'ana@fitclub.test')->firstOrFail();
 
-        $lead = GymLead::where('email', 'ana@fitclub.test')->first();
+        $response->assertRedirect($lead->analysis->publicUrl());
+
         $this->assertNotNull($lead->csv_path);
     }
 
@@ -199,9 +199,9 @@ CSV;
 
         $response = $this->postWithCsvContent('espanol.csv', $content);
 
-        $response->assertRedirect(route('thanks'));
+        $lead = GymLead::where('email', 'ana@fitclub.test')->firstOrFail();
 
-        $lead = GymLead::where('email', 'ana@fitclub.test')->first();
+        $response->assertRedirect($lead->analysis->publicUrl());
 
         $this->assertNotNull($lead);
         $this->assertStringContainsString('Muñoz Sánchez', Storage::disk('local')->get($lead->csv_path));
@@ -213,7 +213,9 @@ CSV;
 
         $response = $this->postWithCsvContent('comas.csv', $content);
 
-        $response->assertRedirect(route('thanks'));
+        $lead = GymLead::where('email', 'ana@fitclub.test')->firstOrFail();
+
+        $response->assertRedirect($lead->analysis->publicUrl());
         $this->assertDatabaseCount('gym_leads', 1);
     }
 
@@ -223,7 +225,9 @@ CSV;
 
         $response = $this->postWithCsvContent('puntoycoma.csv', $content);
 
-        $response->assertRedirect(route('thanks'));
+        $lead = GymLead::where('email', 'ana@fitclub.test')->firstOrFail();
+
+        $response->assertRedirect($lead->analysis->publicUrl());
         $this->assertDatabaseCount('gym_leads', 1);
 
         $lead = GymLead::where('email', 'ana@fitclub.test')->first();
@@ -236,7 +240,9 @@ CSV;
 
         $response = $this->postWithCsvContent('bom.csv', $content);
 
-        $response->assertRedirect(route('thanks'));
+        $lead = GymLead::where('email', 'ana@fitclub.test')->firstOrFail();
+
+        $response->assertRedirect($lead->analysis->publicUrl());
         $this->assertDatabaseCount('gym_leads', 1);
     }
 
@@ -244,7 +250,9 @@ CSV;
     {
         $response = $this->postWithCsvContent('exportacion.txt', self::VALID_CSV);
 
-        $response->assertRedirect(route('thanks'));
+        $lead = GymLead::where('email', 'ana@fitclub.test')->firstOrFail();
+
+        $response->assertRedirect($lead->analysis->publicUrl());
         $this->assertDatabaseCount('gym_leads', 1);
     }
 

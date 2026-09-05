@@ -41,10 +41,56 @@ class LeadController extends Controller
         ]);
 
         if ($csv !== null) {
-            $this->computeAnalysis($lead);
+            return $this->handleCsvFlow($lead);
         }
 
         return redirect()->route('thanks');
+    }
+
+    /**
+     * Redirige tras guardar un lead con CSV.
+     *
+     * - Con registros válidos: redirección directa al informe público.
+     * - Sin registros válidos o con error de análisis: mensaje amigable y
+     *   vuelta al formulario conservando el lead y los datos introducidos.
+     */
+    private function handleCsvFlow(GymLead $lead): RedirectResponse
+    {
+        try {
+            $analysis = $this->computeAnalysis($lead);
+
+            if ($analysis === null || $analysis->members_valid < 1) {
+                Log::info('El CSV del lead {lead} no contiene registros válidos para el informe.', [
+                    'lead' => $lead->id,
+                ]);
+
+                return $this->analysisUnavailable(
+                    'No hemos podido generar tu informe: ninguna fila del CSV contiene datos válidos. Revisa el archivo e inténtalo de nuevo.',
+                );
+            }
+
+            return redirect()->route('analysis.public.show', [
+                'token' => $analysis->ensurePublicToken(),
+            ]);
+        } catch (CsvParseException|\Throwable $exception) {
+            Log::error('No se ha podido analizar el CSV del lead {lead}.', [
+                'lead' => $lead->id,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return $this->analysisUnavailable(
+                'No hemos podido generar tu informe con este CSV. Revisa el archivo e inténtalo de nuevo.',
+            );
+        }
+    }
+
+    private function analysisUnavailable(string $message): RedirectResponse
+    {
+        return redirect()->back()
+            ->withInput()
+            ->withErrors([
+                'csv' => $message,
+            ]);
     }
 
     /**
@@ -87,26 +133,21 @@ class LeadController extends Controller
     /**
      * Calcula el análisis del CSV y lo guarda asociado al lead.
      *
-     * Si el análisis falla, el lead se mantiene guardado y el fallo se registra.
+     * Devuelve el análisis persistido o null cuando no se dispone de contenido.
+     * Los errores de procesamiento se propagan para que el flujo público
+     * decida cómo responder; el lead queda guardado en cualquier caso.
      */
-    private function computeAnalysis(GymLead $lead): void
+    private function computeAnalysis(GymLead $lead): ?GymLeadAnalysis
     {
-        try {
-            $content = Storage::disk('local')->get($lead->csv_path);
+        $content = Storage::disk('local')->get($lead->csv_path);
 
-            if ($content === null) {
-                return;
-            }
-
-            $parsed = (new CsvParser)->parse($content);
-            $result = (new CsvAnalysisEngine)->analyze($parsed);
-
-            $lead->analysis()->updateOrCreate([], GymLeadAnalysis::fromResult($result));
-        } catch (CsvParseException|\Throwable $exception) {
-            Log::warning('No se ha podido analizar el CSV del lead {lead}.', [
-                'lead' => $lead->id,
-                'error' => $exception->getMessage(),
-            ]);
+        if ($content === null) {
+            return null;
         }
+
+        $parsed = (new CsvParser)->parse($content);
+        $result = app(CsvAnalysisEngine::class)->analyze($parsed);
+
+        return $lead->analysis()->updateOrCreate([], GymLeadAnalysis::fromResult($result));
     }
 }

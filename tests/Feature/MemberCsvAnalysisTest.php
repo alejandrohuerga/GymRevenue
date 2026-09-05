@@ -80,7 +80,9 @@ CSV;
     {
         $response = $this->postCsv(self::SAMPLE_CSV);
 
-        $response->assertRedirect(route('thanks'));
+        $lead = GymLead::where('email', 'ana@fitclub.test')->firstOrFail();
+
+        $response->assertRedirect($lead->analysis->publicUrl());
 
         $this->assertDatabaseCount('gym_lead_analyses', 1);
 

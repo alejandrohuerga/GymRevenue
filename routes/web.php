@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\Admin\LeadController as AdminLeadController;
+use App\Http\Controllers\AnalysisReportController;
 use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\PageController;
@@ -26,6 +27,14 @@ Route::get('/aviso-legal', [PageController::class, 'legal'])->name('legal');
 Route::get('/privacidad', [PageController::class, 'privacy'])->name('privacy');
 
 Route::get('/cookies', [PageController::class, 'cookies'])->name('cookies');
+
+Route::get('/analisis/{token}', [AnalysisReportController::class, 'show'])
+    ->name('analysis.public.show')
+    ->middleware('throttle:60,1');
+
+Route::post('/analisis/{token}/contacto', [AnalysisReportController::class, 'contact'])
+    ->name('analysis.public.contact')
+    ->middleware('throttle:5,1');
 
 Route::middleware('guest')->prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');

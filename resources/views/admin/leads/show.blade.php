@@ -134,6 +134,44 @@
                     @endif
                 </div>
 
+                @if ($analysis->members_valid > 0)
+                    @php
+                        $publicUrl = $analysis->public_token
+                            ? route('analysis.public.show', $analysis->public_token)
+                            : null;
+                    @endphp
+                    <div class="mt-6 border-t border-zinc-800 pt-4">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <p class="text-xs uppercase tracking-widest text-zinc-500">Informe público</p>
+                            @if ($publicUrl)
+                                <a
+                                    href="{{ $publicUrl }}"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="rounded-sm border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-200 hover:border-emerald-400 hover:text-emerald-400 transition-colors"
+                                >
+                                    Ver informe
+                                </a>
+                                <button
+                                    type="button"
+                                    data-copy-link
+                                    data-public-link="{{ $publicUrl }}"
+                                    class="rounded-sm border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-200 hover:border-emerald-400 hover:text-emerald-400 transition-colors"
+                                >
+                                    Copiar enlace
+                                </button>
+                                <span
+                                    data-copy-feedback
+                                    hidden
+                                    class="text-xs text-emerald-400"
+                                >Enlace copiado</span>
+                            @else
+                                <p class="text-xs text-zinc-600">Disponible al visualizar el informe comercial.</p>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
                 <dl class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6 text-sm">
                     <div>
                         <dt class="text-zinc-500">Registros totales</dt>
@@ -290,4 +328,35 @@
             </form>
         </section>
     </div>
+
+    <script>
+        (() => {
+            const copyButtons = document.querySelectorAll('[data-copy-link]');
+            copyButtons.forEach((button) => {
+                button.addEventListener('click', async () => {
+                    const url = button.getAttribute('data-public-link');
+                    if (!url) {
+                        return;
+                    }
+                    try {
+                        await navigator.clipboard.writeText(url);
+                    } catch {
+                        const input = document.createElement('textarea');
+                        input.value = url;
+                        input.style.position = 'fixed';
+                        input.style.opacity = '0';
+                        document.body.appendChild(input);
+                        input.select();
+                        document.execCommand('copy');
+                        input.remove();
+                    }
+                    const feedback = button.parentElement?.querySelector('[data-copy-feedback]');
+                    if (feedback) {
+                        feedback.hidden = false;
+                        setTimeout(() => { feedback.hidden = true; }, 2000);
+                    }
+                });
+            });
+        })();
+    </script>
 @endsection

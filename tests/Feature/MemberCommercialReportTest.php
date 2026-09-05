@@ -97,9 +97,9 @@ class MemberCommercialReportTest extends TestCase
             'csv' => UploadedFile::fake()->createWithContent('socios_20.csv', $content),
         ]);
 
-        $response->assertRedirect(route('thanks'));
-
         $lead = GymLead::where('email', 'ana@fitclub.test')->firstOrFail();
+
+        $response->assertRedirect($lead->analysis->publicUrl());
 
         $this->assertDatabaseHas('gym_lead_analyses', [
             'gym_lead_id' => $lead->id,
@@ -223,7 +223,7 @@ class MemberCommercialReportTest extends TestCase
             ->assertDontSee('Bajas recientes')
             ->assertDontSee('Potencial de reactivación')
             ->assertDontSee('Cuotas de socios con baja actividad')
-            ->assertSee('Quiero mejorar mi gimnasio')
+            ->assertSee('Ver informe público')
             ->assertSee('No hemos detectado socios inactivos en el archivo.')
             ->assertSee('No hemos detectado bajas durante los últimos 90 días.')
             ->assertSee('No hemos detectado socios activos con más de 60 días sin registrar una visita.');

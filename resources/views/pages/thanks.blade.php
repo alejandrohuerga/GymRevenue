@@ -18,6 +18,11 @@
             <p class="mt-6 text-zinc-400 leading-relaxed">
                 Estamos preparando el siguiente paso de tu análisis.
             </p>
+            <p class="mt-4 text-sm text-zinc-500 leading-relaxed">
+                El informe automático a partir de los datos de tus socios requiere adjuntar
+                un CSV. Si quieres el análisis completo, envíaselo a tu contacto de GymRevenue
+                o sube el archivo al responder.
+            </p>
 
             <div class="mt-10 flex flex-wrap items-center gap-6">
                 <a

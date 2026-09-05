@@ -16,3 +16,18 @@ if (menuToggle) {
         menu.hidden = expanded;
     });
 }
+
+// Previene el doble envío del formulario de captación y comunica el estado.
+const leadForm = document.querySelector('[data-lead-form]');
+if (leadForm) {
+    leadForm.addEventListener('submit', () => {
+        const submit = leadForm.querySelector('button[type="submit"]');
+        if (!submit) {
+            return;
+        }
+        const csvInput = leadForm.querySelector('input[type="file"][name="csv"]');
+        const hasCsv = csvInput instanceof HTMLInputElement && Boolean(csvInput.files?.length);
+        submit.disabled = true;
+        submit.textContent = hasCsv ? 'Analizando...' : 'Enviando...';
+    });
+}

@@ -62,6 +62,8 @@ class LeadController extends Controller
     {
         abort_unless($lead->analysis, 404);
 
+        $lead->analysis->ensurePublicToken();
+
         $report = CommercialReport::fromAnalysis($lead->analysis);
 
         return view('admin.leads.report', [
