@@ -13,16 +13,21 @@
             </span>
 
             <h1 class="mt-8 text-4xl sm:text-5xl font-black tracking-tight leading-[1.05] text-balance">
-                Hemos recibido tus datos.
+                Tu solicitud ha sido recibida.
             </h1>
             <p class="mt-6 text-zinc-400 leading-relaxed">
-                Estamos preparando el siguiente paso de tu análisis.
+                El siguiente paso es analizar los datos de tu gimnasio
+                para identificar las oportunidades que podrías estar dejando pasar.
             </p>
-            <p class="mt-4 text-sm text-zinc-500 leading-relaxed">
-                El informe automático a partir de los datos de tus socios requiere adjuntar
-                un CSV. Si quieres el análisis completo, envíaselo a tu contacto de GymRevenue
-                o sube el archivo al responder.
-            </p>
+
+            <div class="mt-8 border border-zinc-800 p-6 text-sm text-zinc-400 leading-relaxed">
+                <p class="font-semibold text-zinc-100">Qué pasa ahora:</p>
+                <ol class="mt-3 grid gap-2 list-decimal list-inside">
+                    <li>Revisamos los datos de tu gimnasio.</li>
+                    <li>Identificamos las oportunidades prioritarias.</li>
+                    <li>Te contactamos con el análisis y los próximos pasos.</li>
+                </ol>
+            </div>
 
             <div class="mt-10 flex flex-wrap items-center gap-6">
                 <a

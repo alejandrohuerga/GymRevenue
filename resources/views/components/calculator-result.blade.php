@@ -1,4 +1,4 @@
-<div data-calculator-result hidden tabindex="-1" aria-live="polite" class="mt-10 border border-emerald-400 p-8 outline-none">
+<div data-calculator-result data-amount="0" hidden tabindex="-1" aria-live="polite" class="mt-10 border border-emerald-400 p-8 outline-none">
     <p class="text-sm uppercase tracking-widest text-emerald-400">Oportunidad estimada</p>
 
     <p class="mt-4 text-4xl md:text-5xl font-black text-emerald-400 tracking-tight">
@@ -25,7 +25,12 @@
     </dl>
 
     <p class="mt-6 text-sm font-semibold text-zinc-100">
-        ¿Quieres descubrir exactamente dónde está?
+        Descubre exactamente dónde está la oportunidad.
+    </p>
+
+    <p class="mt-2 text-sm text-zinc-400 leading-relaxed">
+        Introduce los datos de tu gimnasio y te mostramos cómo podemos ayudarte
+        a identificar las oportunidades que podrías estar dejando pasar.
     </p>
 
     <a

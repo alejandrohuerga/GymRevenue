@@ -110,7 +110,7 @@ export function initCalculator() {
     }
 
     submit.addEventListener('click', () => {
-        track('calculator_started');
+        track('calculator_start');
 
         fieldKeys.forEach(clearError);
 
@@ -171,10 +171,11 @@ export function initCalculator() {
         result.classList.remove('calc-reveal');
         void result.offsetWidth;
         result.classList.add('calc-reveal');
+        result.dataset.amount = String(opportunity.monthly);
         result.focus({ preventScroll: true });
         result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-        track('calculator_completed', { amount: opportunity.monthly });
+        track('calculator_complete', { amount: opportunity.monthly });
     });
 
     result.addEventListener('animationend', () => {

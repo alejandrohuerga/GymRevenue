@@ -18,8 +18,8 @@
                 <p class="text-sm uppercase tracking-widest text-emerald-400">Metodología</p>
                 <p class="mt-4 text-sm text-zinc-400 leading-relaxed">
                     La estimación se calcula con tus datos:
-                    <span class="text-zinc-100">(socios inactivos + bajas mensuales) × cuota media</span>.
-                    A ese valor mensual se aplica un factor conservador de recuperación del 50%.
+                    <span class="text-zinc-100">(socios inactivos × 20% + bajas mensuales × 15%) × cuota media</span>.
+                    Los porcentajes son hipótesis conservadoras que se ajustarán con datos reales.
                 </p>
             </div>
             <div class="bg-zinc-950 p-8">

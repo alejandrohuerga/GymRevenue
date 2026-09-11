@@ -6,8 +6,8 @@
                 Descubre exactamente dónde está la oportunidad.
             </h2>
             <p class="mt-4 text-zinc-400 leading-relaxed">
-                Deja tus datos y preparamos el análisis de tu gimnasio.
-                Te contactamos en las próximas 24 horas.
+                Déjanos los datos básicos de tu gimnasio y te mostraremos
+                las oportunidades que podrías estar dejando pasar.
             </p>
         </div>
 
@@ -142,10 +142,13 @@
                 <div>
                     <button
                         type="submit"
-                        class="rounded-sm bg-emerald-400 px-8 py-4 text-sm font-bold text-zinc-950 hover:bg-emerald-300 transition-colors"
+                        class="w-full rounded-sm bg-emerald-400 px-8 py-4 text-sm font-bold text-zinc-950 hover:bg-emerald-300 transition-colors"
                     >
-                        Enviar
+                        Ver mi análisis gratuito
                     </button>
+                    <p class="mt-3 text-xs text-zinc-500 leading-relaxed">
+                        Sin compromiso. No necesitas cambiar tu software.
+                    </p>
                 </div>
             </form>
         </div>
