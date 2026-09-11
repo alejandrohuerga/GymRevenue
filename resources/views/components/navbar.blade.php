@@ -20,18 +20,27 @@
             </a>
         </div>
 
-        <button
-            type="button"
-            data-menu-toggle
-            aria-controls="mobile-menu"
-            aria-expanded="false"
-            class="md:hidden flex flex-col items-end justify-center gap-1.5 p-2"
-        >
-            <span class="block h-0.5 w-6 bg-zinc-100"></span>
-            <span class="block h-0.5 w-4 bg-emerald-400"></span>
-            <span class="block h-0.5 w-6 bg-zinc-100"></span>
-            <span class="sr-only">Abrir menú</span>
-        </button>
+        <div class="flex items-center gap-3 md:hidden">
+            <a
+                href="{{ route('calculator') }}"
+                data-track-cta="navbar-mobile"
+                class="rounded-sm bg-emerald-400 px-4 py-2 text-xs font-bold text-zinc-950 hover:bg-emerald-300 transition-colors"
+            >
+                Analizar
+            </a>
+            <button
+                type="button"
+                data-menu-toggle
+                aria-controls="mobile-menu"
+                aria-expanded="false"
+                class="flex flex-col items-end justify-center gap-1.5 p-2"
+            >
+                <span class="block h-0.5 w-6 bg-zinc-100"></span>
+                <span class="block h-0.5 w-4 bg-emerald-400"></span>
+                <span class="block h-0.5 w-6 bg-zinc-100"></span>
+                <span class="sr-only">Abrir menú</span>
+            </button>
+        </div>
     </nav>
 
     <div id="mobile-menu" data-menu hidden class="md:hidden border-t border-zinc-800 px-6 py-6">

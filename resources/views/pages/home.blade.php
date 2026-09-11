@@ -5,12 +5,12 @@
 
 @section('content')
     <x-hero />
+    <x-calculator />
+    <x-lead-form />
     <x-social-proof />
     <x-problem />
     <x-solution />
     <x-how-it-works />
-    <x-calculator />
-    <x-lead-form />
     <x-dashboard-preview />
     <x-benefits />
     <x-differentiation />

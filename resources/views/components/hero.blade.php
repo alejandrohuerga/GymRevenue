@@ -14,7 +14,7 @@
 
         <div class="mt-8">
             <a
-                href="{{ route('calculator') }}"
+                href="#calculadora"
                 data-track-cta="hero"
                 class="inline-block rounded-sm bg-emerald-400 px-8 py-4 text-sm font-bold text-zinc-950 hover:bg-emerald-300 transition-colors"
             >
