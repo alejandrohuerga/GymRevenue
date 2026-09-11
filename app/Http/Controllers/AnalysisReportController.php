@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * El token es el único secreto que autoriza el acceso: por eso la ruta es
  * pública, no se indexa y la respuesta se sirve sin almacenamiento en caché
- * pública. 
+ * pública.Prueba BD
  */
 class AnalysisReportController extends Controller
 {
