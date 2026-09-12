@@ -38,11 +38,13 @@ export function initAnalytics() {
         track('pricing_view');
     } else if (path === '/como-funciona') {
         track('how_it_works_view');
-    } else if (path === '/gracias') {
-        // Proxy del lead creado: la página solo debe alcanzarse tras enviar el formulario.
-        track('lead_created');
     } else if (path.startsWith('/analisis/')) {
         track('analysis_view');
+    }
+
+    // lead_created se emite solo cuando el servidor confirmó el guardado del lead.
+    if (window.__gymRevenue?.leadCreated) {
+        track('lead_created');
     }
 
     // Visibilidad de calculadora y formulario (etapas intermedias del funnel).

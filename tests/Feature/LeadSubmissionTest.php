@@ -163,4 +163,82 @@ class LeadSubmissionTest extends TestCase
         $this->assertEquals(330.0, $monthly);
         $this->assertEquals(3960.0, $annual);
     }
+
+    public function test_lead_created_signal_is_flashed_after_successful_create(): void
+    {
+        $response = $this->post(route('lead.store'), [
+            'gym_name' => 'Fit Club',
+            'contact_name' => 'Ana',
+            'email' => 'ana@fitclub.test',
+            'software' => 'Excel',
+            'members' => 350,
+            'average_fee' => 40,
+            'inactive_members' => 30,
+            'monthly_cancellations' => 15,
+            'consent' => '1',
+        ]);
+
+        $response->assertRedirect(route('thanks'));
+        $this->assertTrue(session('lead_created'));
+
+        $this->get(route('thanks'))
+            ->assertOk()
+            ->assertSee('leadCreated: true', false);
+    }
+
+    public function test_lead_created_signal_is_not_flashed_when_validation_fails(): void
+    {
+        $response = $this->post(route('lead.store'), [
+            'gym_name' => 'Fit Club',
+            'contact_name' => 'Ana',
+            'email' => 'ana@fitclub.test',
+        ]);
+
+        $response->assertSessionHasErrors('consent');
+        $this->assertDatabaseCount('gym_leads', 0);
+        $this->assertNull(session('lead_created'));
+    }
+
+    public function test_lead_created_signal_is_not_flashed_when_save_fails(): void
+    {
+        GymLead::creating(function (): never {
+            throw new \RuntimeException('fallo simulado al guardar el lead');
+        });
+
+        $response = $this->from(route('calculator'))
+            ->post(route('lead.store'), [
+                'gym_name' => 'Fit Club',
+                'contact_name' => 'Ana',
+                'email' => 'ana@fitclub.test',
+                'members' => 350,
+                'average_fee' => 40,
+                'inactive_members' => 30,
+                'monthly_cancellations' => 15,
+                'consent' => '1',
+            ]);
+
+        $response->assertServerError();
+        $this->assertDatabaseCount('gym_leads', 0);
+        $this->assertNull(session('lead_created'));
+    }
+
+    public function test_lead_created_signal_is_only_flashed_once(): void
+    {
+        $this->post(route('lead.store'), [
+            'gym_name' => 'Fit Club',
+            'contact_name' => 'Ana',
+            'email' => 'ana@fitclub.test',
+            'members' => 350,
+            'average_fee' => 40,
+            'inactive_members' => 30,
+            'monthly_cancellations' => 15,
+            'consent' => '1',
+        ]);
+
+        $this->get(route('thanks'))
+            ->assertSee('leadCreated: true', false);
+
+        $this->get(route('thanks'))
+            ->assertSee('leadCreated: false', false);
+    }
 }

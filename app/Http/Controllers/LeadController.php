@@ -40,6 +40,9 @@ class LeadController extends Controller
             'csv_uploaded_at' => $csv['uploaded_at'] ?? null,
         ]);
 
+        // Señal one-shot para analytics: lead_created solo si el guardado fue real.
+        session()->flash('lead_created', true);
+
         if ($csv !== null) {
             return $this->handleCsvFlow($lead);
         }
