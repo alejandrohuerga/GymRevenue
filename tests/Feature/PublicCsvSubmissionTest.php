@@ -172,6 +172,25 @@ CSV;
         $this->assertDatabaseCount('gym_lead_analyses', 0);
     }
 
+    public function test_lead_created_signal_is_flashed_on_csv_report_redirect(): void
+    {
+        $content = (string) file_get_contents(base_path('tests/Fixtures/csv/socios_20.csv'));
+
+        $response = $this->post(route('lead.store'), [
+            ...$this->validPayload(),
+            'csv' => UploadedFile::fake()->createWithContent('socios.csv', $content),
+        ]);
+
+        $lead = GymLead::where('email', 'ana@fitclub.test')->firstOrFail();
+
+        $response->assertRedirect($lead->analysis->publicUrl());
+        $this->assertTrue(session('lead_created'));
+
+        $this->get($lead->analysis->publicUrl())
+            ->assertOk()
+            ->assertSee('leadCreated: true', false);
+    }
+
     public function test_repeated_submit_creates_distinct_leads_with_one_analysis_each(): void
     {
         $payload = [

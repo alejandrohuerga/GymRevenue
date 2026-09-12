@@ -41,6 +41,10 @@
 
         @stack('head')
 
+        <script>
+            window.__gymRevenue = { leadCreated: @json((bool) session('lead_created')) };
+        </script>
+
         @fonts
 
         @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))

@@ -20,9 +20,13 @@ if (menuToggle) {
 // Previene el doble envío del formulario de captación y comunica el estado.
 const leadForm = document.querySelector('[data-lead-form]');
 if (leadForm) {
-    leadForm.addEventListener('submit', () => {
+    leadForm.addEventListener('submit', (event) => {
         const submit = leadForm.querySelector('button[type="submit"]');
         if (!submit) {
+            return;
+        }
+        if (submit.disabled) {
+            event.preventDefault();
             return;
         }
         const csvInput = leadForm.querySelector('input[type="file"][name="csv"]');
