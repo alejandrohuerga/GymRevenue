@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
+        <link rel="icon" type="image/x-icon" href="{{ asset('FaviconLogo.jpg') }}">
+
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-JCBM7WNE7V"></script>
         <script>
